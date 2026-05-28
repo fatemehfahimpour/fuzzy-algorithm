@@ -16,5 +16,3 @@ def h_in_membership(x):
         "Normal": trimf(x, *config.H_NORMAL_PARAMS),
         "Wet": trapmf(x, *config.H_WET_PARAMS),
     }
-
-
