@@ -1,25 +1,5 @@
 import numpy as np
-
-def trimf(x, a, b, c):
-    if x <= a or x >= c:
-        return 0.0
-    elif a < x < b:
-        return (x - a) / (b - a)
-    elif b <= x < c:
-        return (c - x) / (c - b)
-    return 0.0
-
-
-def trapmf(x, a, b, c, d):
-    if x <= a or x >= d:
-        return 0.0
-    elif b <= x <= c:
-        return 1.0
-    elif a < x < b:
-        return (x - a) / (b - a)
-    elif c < x < d:
-        return (d - x) / (d - c)
-    return 0.0
+from membership_function import trimf, trapmf
 
 
 def compute_envrisk(T_in, T_out, Wind, W):
@@ -83,7 +63,6 @@ def fuzzify_env(x):
     }
 
 
-
 def light_output(label, z):
     if label == "No":
         return trapmf(z, 0, 0, 10, 25)
@@ -126,6 +105,7 @@ def light_rules(light, density, weather):
         rules.append((light["Low"], "Mid"))
     return rules
 
+
 def co2_rules(co2, density, temp, weather, light, env):
     rules = []
     rules.append((min(co2["Low"], density["High"]), "IncHigh"))
@@ -142,8 +122,8 @@ def co2_rules(co2, density, temp, weather, light, env):
 
     return rules
 
-def defuzzify(rules, zmin, zmax, mf):
 
+def defuzzify(rules, zmin, zmax, mf):
     step = 1
     num = 0
     den = 0
@@ -179,6 +159,7 @@ def light_co2_controller(data):
         "LightControl": defuzzify(light_r, 0, 100, light_output),
         "CO2Control": defuzzify(co2_r, -100, 100, co2_output)
     }
+
 
 if __name__ == "__main__":
     sample = {
