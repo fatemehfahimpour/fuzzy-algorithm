@@ -8,7 +8,7 @@ def trimf(x, a, b, c):
 
 
 def trapmf(x, a, b, c, d):
-    if x<= a or x>= d:
+    if x <= a or x >= d:
         return 0.0
     elif a < x < b:
         return (x - a) / (b - a) if b != a else 0.0
