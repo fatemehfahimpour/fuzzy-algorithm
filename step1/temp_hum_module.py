@@ -1,3 +1,7 @@
+import numpy as np
+
+from step1.light_co2_module import compute_envrisk, fuzzify_light, fuzzify_env, fuzzify_co2, fuzzify_density
+from step1.mamdani_engine import defuzzify
 from step1.membership_function import trapmf, trimf
 import config
 
@@ -29,6 +33,7 @@ def temp_output(label, z):
         return trimf(z, *config.TEMP_HEAT)
     elif label == "StrongHeat":
         return trapmf(z, *config.TEMP_STRONG_HEAT)
+    return 0
 
 
 def hum_output(label, z):
@@ -42,6 +47,7 @@ def hum_output(label, z):
         return trimf(z, *config.HUM_HUMIDIFY)
     elif label == "StrongHum":
         return trapmf(z, *config.HUM_STRONG_HUM)
+    return 0
 
 
 def temp_rules(temp_in, env_risk, light_eff, weather):
@@ -94,3 +100,29 @@ def energy_efficiency_rules(co2_fz, density_fz, light_fz, env_fz, temp_fz, hum_f
     rules["co2"].append((min(co2_fz["Low"], density_fz["High"], light_fz["Low"]), "IncLow"))
     rules["co2"].append((min(co2_fz["High"], env_fz["High"]), "DecLow"))
     return rules
+
+
+def temp_hum_controller(data):
+    weather = str(data["W"]).lower()
+    L_eff = data["L"] + data["Solar"]
+    env = compute_envrisk(data["T_in"], data["T_out"], data["Wind"], weather)
+
+    temp_fz = fuzzify_temp(data["T_in"])
+    hum_in_fz = fuzzify_hum(data["H_in"])
+    hum_out_fz = fuzzify_hum(data["H_out"])
+    light_fz = fuzzify_light(L_eff)
+    env_fz = fuzzify_env(env)
+    co2_fz = fuzzify_co2(data["CO2"])
+    density_fz = fuzzify_density(data["N"])
+
+    temp_rule = temp_rules(temp_fz , env_fz , light_fz, weather)
+    hum_rule = hum_rules(hum_in_fz,temp_fz, weather, hum_out_fz)
+    energy_rules = energy_efficiency_rules(co2_fz, density_fz, light_fz, env_fz, temp_fz, hum_in_fz)
+
+    temp_rule.extend(energy_rules["temp"])
+    hum_rule.extend(energy_rules["hum"])
+
+    return {
+        "TempControl": defuzzify(temp_rule , -100, 100, temp_output),
+        "hum_control": defuzzify(hum_rule, -100, 100, hum_output)
+    }

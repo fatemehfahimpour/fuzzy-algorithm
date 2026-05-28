@@ -1,5 +1,7 @@
 import numpy as np
 from membership_function import trimf, trapmf
+from step1.mamdani_engine import defuzzify
+from step1.temp_hum_module import energy_efficiency_rules, fuzzify_hum
 
 
 def compute_envrisk(T_in, T_out, Wind, W):
@@ -123,22 +125,6 @@ def co2_rules(co2, density, temp, weather, light, env):
     return rules
 
 
-def defuzzify(rules, zmin, zmax, mf):
-    step = 1
-    num = 0
-    den = 0
-
-    for z in np.arange(zmin, zmax + step, step):
-        mu = 0
-        for strength, label in rules:
-            mu = max(mu, min(strength, mf(label, z)))
-
-        num += z * mu
-        den += mu
-
-    return num / den if den != 0 else 0
-
-
 def light_co2_controller(data):
     W = str(data["W"]).lower()
 
@@ -151,9 +137,20 @@ def light_co2_controller(data):
     density_fz = fuzzify_density(data["N"])
     temp_fz = fuzzify_temp(data["T_in"])
     env_fz = fuzzify_env(env)
+    hum_fz = fuzzify_hum(data["H_in"])
 
+    # قوانین اصلی
     light_r = light_rules(light_fz, density_fz, W)
     co2_r = co2_rules(co2_fz, density_fz, temp_fz, W, light_fz, env_fz)
+
+    # قوانین بهینه‌سازی انرژی
+    energy_rules = energy_efficiency_rules(
+        co2_fz, density_fz, light_fz, env_fz, temp_fz, hum_fz
+    )
+
+    # اضافه شدن قوانین energy efficiency به خروجی‌های مربوطه
+    light_r.extend(energy_rules["light"])
+    co2_r.extend(energy_rules["co2"])
 
     return {
         "LightControl": defuzzify(light_r, 0, 100, light_output),
@@ -170,7 +167,8 @@ if __name__ == "__main__":
         "T_in": 22,
         "T_out": 18,
         "Wind": 2,
-        "W": "sunny"
+        "W": "sunny",
+        "H_in": 20
     }
 
     print(light_co2_controller(sample))
