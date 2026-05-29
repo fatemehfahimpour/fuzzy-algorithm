@@ -238,7 +238,7 @@ def temp_hum_light_co2_controller(data):
 
     return {
         "TempControl": defuzzify(temp_rule , -100, 100, temp_output),
-        "hum_control": defuzzify(hum_rule, -100, 100, hum_output),
+        "HumControl": defuzzify(hum_rule, -100, 100, hum_output),
         "LightControl": defuzzify(light_rule, 0, 100, light_output),
         "CO2Control": defuzzify(co2_rule, -100, 100, co2_output)
     }
