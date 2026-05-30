@@ -1,6 +1,7 @@
 from step1.membership_function import trapmf, trimf
 import numpy as np
 
+
 # FUZZIFICATION-----------------------------------------------------------------
 def fuzzify_light(x):
     return {
@@ -48,61 +49,6 @@ def fuzzify_env(x):
         "Medium": trimf(x, 10, 20, 30),
         "High": trapmf(x, 25, 35, 60, 60)
     }
-
-
-# defuzzified outputs--------------------------------------------------------------------
-def temp_output(label, z):
-    if label == "StrongCool":
-        return trapmf(z, -100, -100, -70, -40)
-    elif label == "Cool":
-        return trimf(z, -60, -30, 0)
-    elif label == "NoChange":
-        return trimf(z, -10, 0, 10)
-    elif label == "Heat":
-        return trimf(z, 0, 30, 60)
-    elif label == "StrongHeat":
-        return trapmf(z, 40, 70, 100, 100)
-    return 0
-
-
-def hum_output(label, z):
-    if label == "StrongDry":
-        return trapmf(z, -100, -100, -70, -40)
-    elif label == "Dry":
-        return trimf(z, -60, -30, 0)
-    elif label == "NoChange":
-        return trimf(z, -10, 0, 10)
-    elif label == "Hum":
-        return trimf(z, 0, 30, 60)
-    elif label == "StrongHum":
-        return trapmf(z, 40, 70, 100, 100)
-    return 0
-
-
-def light_output(label, z):
-    if label == "No":
-        return trapmf(z, 0, 0, 10, 25)
-    if label == "Low":
-        return trimf(z, 15, 35, 55)
-    if label == "Mid":
-        return trimf(z, 40, 60, 80)
-    if label == "High":
-        return trapmf(z, 70, 85, 100, 100)
-    return 0
-
-
-def co2_output(label, z):
-    if label == "DecHigh":
-        return trapmf(z, -100, -100, -70, -40)
-    if label == "DecLow":
-        return trimf(z, -60, -30, 0)
-    if label == "Zero":
-        return trimf(z, -15, 0, 15)
-    if label == "IncLow":
-        return trimf(z, 0, 30, 60)
-    if label == "IncHigh":
-        return trapmf(z, 40, 70, 100, 100)
-    return 0
 
 
 # RULES----------------------------------------------------------------------------------------
@@ -191,12 +137,68 @@ def co2_rules(co2, density, temp, weather, light, env):
 
     return rules
 
+
+# defuzzified outputs--------------------------------------------------------------------
+def temp_output(label, z):
+    if label == "StrongCool":
+        return trapmf(z, -100, -100, -70, -40)
+    elif label == "Cool":
+        return trimf(z, -60, -30, 0)
+    elif label == "NoChange":
+        return trimf(z, -10, 0, 10)
+    elif label == "Heat":
+        return trimf(z, 0, 30, 60)
+    elif label == "StrongHeat":
+        return trapmf(z, 40, 70, 100, 100)
+    return 0
+
+
+def hum_output(label, z):
+    if label == "StrongDry":
+        return trapmf(z, -100, -100, -70, -40)
+    elif label == "Dry":
+        return trimf(z, -60, -30, 0)
+    elif label == "NoChange":
+        return trimf(z, -10, 0, 10)
+    elif label == "Hum":
+        return trimf(z, 0, 30, 60)
+    elif label == "StrongHum":
+        return trapmf(z, 40, 70, 100, 100)
+    return 0
+
+
+def light_output(label, z):
+    if label == "No":
+        return trapmf(z, 0, 0, 10, 25)
+    if label == "Low":
+        return trimf(z, 15, 35, 55)
+    if label == "Mid":
+        return trimf(z, 40, 60, 80)
+    if label == "High":
+        return trapmf(z, 70, 85, 100, 100)
+    return 0
+
+
+def co2_output(label, z):
+    if label == "DecHigh":
+        return trapmf(z, -100, -100, -70, -40)
+    if label == "DecLow":
+        return trimf(z, -60, -30, 0)
+    if label == "Zero":
+        return trimf(z, -15, 0, 15)
+    if label == "IncLow":
+        return trimf(z, 0, 30, 60)
+    if label == "IncHigh":
+        return trapmf(z, 40, 70, 100, 100)
+    return 0
+
+
 # defuzzify---------------------------------------------------------------------------------
-#روش مرکز جسم
 def defuzzify(rules, zmin, zmax, output_func, step=1):
+    # روش مرکز جسم
     # zmin , zmax :  بازه‌ی عددی خروجی قطعی
-    num = 0 #صورت کسر
-    den = 0 #مخرج کسر
+    num = 0  # صورت کسر
+    den = 0  # مخرج کسر
 
     for z in np.arange(zmin, zmax + step, step):
         mu = 0
@@ -206,6 +208,7 @@ def defuzzify(rules, zmin, zmax, output_func, step=1):
         den += mu
 
     return num / den if den != 0 else 0
+
 
 # CONTROLLER---------------------------------------------------------------------------------
 def compute_envrisk(T_in, T_out, Wind, W):
@@ -241,8 +244,8 @@ def temp_hum_light_co2_controller(data):
     co2_fz = fuzzify_co2(data["CO2"])
     density_fz = fuzzify_density(data["N"])
 
-    temp_rule = temp_rules(temp_fz , env_fz , light_fz, weather)
-    hum_rule = hum_rules(hum_in_fz,temp_fz, weather, hum_out_fz)
+    temp_rule = temp_rules(temp_fz, env_fz, light_fz, weather)
+    hum_rule = hum_rules(hum_in_fz, temp_fz, weather, hum_out_fz)
     light_rule = light_rules(light_fz, density_fz, weather)
     co2_rule = co2_rules(co2_fz, density_fz, temp_fz, weather, light_fz, env_fz)
     energy_rules = energy_efficiency_rules(co2_fz, density_fz, light_fz, env_fz, temp_fz, hum_in_fz)
@@ -253,14 +256,14 @@ def temp_hum_light_co2_controller(data):
     co2_rule.extend(energy_rules["co2"])
 
     return {
-        "TempControl": defuzzify(temp_rule , -100, 100, temp_output),
+        "TempControl": defuzzify(temp_rule, -100, 100, temp_output),
         "HumControl": defuzzify(hum_rule, -100, 100, hum_output),
         "LightControl": defuzzify(light_rule, 0, 100, light_output),
         "CO2Control": defuzzify(co2_rule, -100, 100, co2_output)
     }
 
 
-#TEST----------------------------------------------------------------------------------
+# TEST----------------------------------------------------------------------------------
 if __name__ == "__main__":
     sample = {
         "L": 500,
