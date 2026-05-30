@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from fuzzy_controller import temp_hum_light_co2_controller
-from day_night_policy import apply_day_night_policy
 
 class GreenhouseSimulator:
     T_RANGE = (10, 35)
@@ -79,14 +78,6 @@ class GreenhouseSimulator:
             }
 
             controls = temp_hum_light_co2_controller(inputs)
-
-            light_policy, co2_policy = apply_day_night_policy(
-                row["W"].lower(),
-                controls["LightControl"],
-                controls["CO2Control"]
-            )
-            controls["LightControl"] = light_policy
-            controls["CO2Control"] = co2_policy
 
             results.append({# ذخیره اطلاعات روز جاری
                 "day": row["day"],
