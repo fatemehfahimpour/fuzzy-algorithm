@@ -23,10 +23,10 @@ class GreenhouseSimulator:
     def __init__(self, initial_state=None):
         if initial_state is None:
             self.state = {
-                "T_in": 22.0,
-                "H_in": 55.0,
-                "L": 300.0,
-                "CO2": 800.0
+                "T_in": 30.0,
+                "H_in": 30.0,
+                "L": 500.0,
+                "CO2": 600.0
             }
         else:
             self.state = initial_state.copy()

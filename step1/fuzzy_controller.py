@@ -1,6 +1,5 @@
-from step1.mamdani_engine import defuzzify
 from step1.membership_function import trapmf, trimf
-
+import numpy as np
 
 # FUZZIFICATION-----------------------------------------------------------------
 def fuzzify_light(x):
@@ -191,6 +190,23 @@ def co2_rules(co2, density, temp, weather, light, env):
     rules.append((min(co2["Normal"], density["High"]), "IncLow"))
 
     return rules
+
+# defuzzify---------------------------------------------------------------------------------
+#روش مرکز جسم
+def defuzzify(rules, zmin, zmax, output_func, step=1):
+    # zmin , zmax :  بازه‌ی عددی خروجی قطعی
+    num = 0 #صورت کسر
+    den = 0 #مخرج کسر
+
+    for z in np.arange(zmin, zmax + step, step):
+        mu = 0
+        for strength, label in rules:
+            mu = max(mu, min(strength, output_func(label, z)))
+        num += z * mu
+        den += mu
+
+    return num / den if den != 0 else 0
+
 # CONTROLLER---------------------------------------------------------------------------------
 def compute_envrisk(T_in, T_out, Wind, W):
     k_map = {

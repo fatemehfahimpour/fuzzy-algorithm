@@ -31,12 +31,12 @@ class Plotter:
         plt.savefig(f"{output_dir}/hum_inside.png")
         plt.close()
 
-        # نمودار نور مصنوعی
+        # نمودار نور
         plt.figure()
         plt.plot(days, df_results["L"], 'g-o')
         plt.xlabel("روز")
         plt.ylabel("شدت نور (Lux)")
-        plt.title("تغییرات نور مصنوعی")
+        plt.title("تغییرات نور")
         plt.grid(True)
         plt.savefig(f"{output_dir}/light_inside.png")
         plt.close()
@@ -74,7 +74,7 @@ class Plotter:
         axes[0, 1].plot(days, df_results["H_in"], 'b-o')
         axes[0, 1].set_title("رطوبت داخل")
         axes[1, 0].plot(days, df_results["L"], 'g-o')
-        axes[1, 0].set_title("نور مصنوعی")
+        axes[1, 0].set_title("نور")
         axes[1, 1].plot(days, df_results["CO2"], 'm-o')
         axes[1, 1].set_title("CO₂ داخل")
         plt.tight_layout()
