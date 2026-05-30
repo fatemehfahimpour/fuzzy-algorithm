@@ -79,8 +79,8 @@ class GreenhouseSimulator:
                 "W": row["W"]
             }
 
-            # controls = temp_hum_light_co2_mamdani_controller(inputs)
-            controls = temp_hum_light_co2_sugeno_controller(inputs)
+            controls = temp_hum_light_co2_mamdani_controller(inputs)
+            # controls = temp_hum_light_co2_sugeno_controller(inputs)
 
             results.append({# ذخیره اطلاعات روز جاری
                 "day": row["day"],
