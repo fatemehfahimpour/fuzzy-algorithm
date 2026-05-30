@@ -231,7 +231,7 @@ def compute_envrisk(T_in, T_out, Wind, W):
     return max(0, min(60, env))
 
 
-def temp_hum_light_co2_controller(data):
+def temp_hum_light_co2_mamdani_controller(data):
     weather = str(data["W"]).lower()
     L_eff = data["L"] + data["Solar"]
     env = compute_envrisk(data["T_in"], data["T_out"], data["Wind"], weather)
@@ -278,4 +278,4 @@ if __name__ == "__main__":
         "H_out": 70
     }
 
-    print(temp_hum_light_co2_controller(sample))
+    print(temp_hum_light_co2_mamdani_controller(sample))

@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
-from fuzzy_controller import temp_hum_light_co2_controller
+from fuzzy_controller import temp_hum_light_co2_mamdani_controller
+from step1.sugeno_controller import temp_hum_light_co2_sugeno_controller
+
 
 class GreenhouseSimulator:
     T_RANGE = (10, 35)
@@ -77,7 +79,8 @@ class GreenhouseSimulator:
                 "W": row["W"]
             }
 
-            controls = temp_hum_light_co2_controller(inputs)
+            # controls = temp_hum_light_co2_mamdani_controller(inputs)
+            controls = temp_hum_light_co2_sugeno_controller(inputs)
 
             results.append({# ذخیره اطلاعات روز جاری
                 "day": row["day"],
