@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 step2/output
 step2/membership_plots
+step2/rules_results
