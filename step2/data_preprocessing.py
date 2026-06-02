@@ -68,22 +68,24 @@ def detect_outliers_iqr(df, column):
     IQR = Q3 - Q1
     lower_bound = Q1 - 1.5 * IQR
     upper_bound = Q3 + 1.5 * IQR
-    outliers = df[(df[column] < lower_bound) | (df[column] > upper_bound)]
-    return len(outliers), lower_bound, upper_bound
 
+    before = len(df)
+    df = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+    after = len(df)
 
+    return df, after - before, lower_bound, upper_bound
+
+#حذف همه ستون ها
 def report_outliers_details(df, numerical_cols):
-    has_outlier = False
     for col in numerical_cols:
         if col in df.columns:
-            n, low, high = detect_outliers_iqr(df, col)
+            df, n, low, high = detect_outliers_iqr(df, col)
             if n > 0:
-                has_outlier = True
-                print(f"  {col}: {n} داده پرت (محدوده نرمال: [{low:.2f}, {high:.2f}])")
+                print(f"  {col}: {n} داده پرت حذف شد (محدوده نرمال: [{low:.2f}, {high:.2f}])")
             else:
                 print(f"  {col}: بدون داده پرت")
-    if not has_outlier:
-        print("هیچ داده پرتی شناسایی نشد.")
+
+    return df
 
 
 
@@ -156,12 +158,15 @@ if __name__ == "__main__":
     generate_data_report(df)
     show_missing_per_column(df)
     df = check_and_handle_missing(df)
-    report_outliers_details(df, numerical_cols)
+    df = df[df['N'] >= 0]
+    df = report_outliers_details(df, numerical_cols)
     df, le = encode_weather(df)
     X = df.drop(columns=['status'])
     y = df['status']
     show_class_distribution_before(y)
     X_train, X_test, y_train, y_test = split_data_stratified(X, y)
+    X_train['status'] = y_train.values
+    X_test['status'] = y_test.values
     show_class_distribution_after(y_train, y_test)
     save_split_data(X_train, X_test, y_train, y_test)
 
