@@ -3,9 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import sys
+
 sys.path.append('..')
 from step1.membership_function import trimf, trapmf
-
 
 
 def load_data(file_path):
@@ -16,7 +16,6 @@ def load_data(file_path):
     except FileNotFoundError:
         print(f" not found")
         return None
-
 
 
 def extract_domains_from_train_data(df):
@@ -46,179 +45,69 @@ def set_domains(domains):
     global DOMAINS
     DOMAINS = domains
 
-#0.30, 0.25, 0.75, 0.70
-def fuzzify_Tin(x):
-    if 'T_in' not in DOMAINS:
-        return {"Cold": 0, "Normal": 0, "Hot": 0}
-    min_val, max_val = DOMAINS['T_in']
-    mid = (min_val + max_val) / 2
-    cold_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    hot_left = min_val + (max_val - min_val) * 0.7
+
+def fuzzify_three_level(x, feature_name, left_label, mid_label, right_label):
+    if feature_name not in DOMAINS:
+        return {left_label: 0, mid_label: 0, right_label: 0}
+
+    min_val, max_val = DOMAINS[feature_name]
+    span = max_val - min_val
+
+    p20 = min_val + 0.20 * span
+    p35 = min_val + 0.35 * span
+    p50 = min_val + 0.50 * span
+    p65 = min_val + 0.65 * span
+    p80 = min_val + 0.80 * span
+
     return {
-        "Cold": trapmf(x, min_val, min_val, cold_right, normal_left),
-        "Normal": trimf(x, normal_left, normal_center, normal_right),
-        "Hot": trapmf(x, hot_left, normal_right, max_val, max_val)
+        left_label: trapmf(x, min_val, min_val, p20, p35),
+        mid_label: trimf(x, p20, p50, p80),
+        right_label: trapmf(x, p65, p80, max_val, max_val)
     }
+
+
+def fuzzify_Tin(x):
+    return fuzzify_three_level(x, 'T_in', 'Cold', 'Normal', 'Hot')
 
 
 def fuzzify_Tout(x):
-    if 'T_out' not in DOMAINS:
-        return {"Cold": 0, "Normal": 0, "Hot": 0}
-    min_val, max_val = DOMAINS['T_out']
-    mid = (min_val + max_val) / 2
-    cold_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    hot_left = min_val + (max_val - min_val) * 0.7
-    return {
-        "Cold": trapmf(x, min_val, min_val, cold_right, normal_left),
-        "Normal": trimf(x, normal_left, normal_center, normal_right),
-        "Hot": trapmf(x, hot_left, normal_right, max_val, max_val)
-    }
+    return fuzzify_three_level(x, 'T_out', 'Cold', 'Normal', 'Hot')
 
 
 def fuzzify_Hin(x):
-    if 'H_in' not in DOMAINS:
-        return {"Dry": 0, "Normal": 0, "Wet": 0}
-    min_val, max_val = DOMAINS['H_in']
-    mid = (min_val + max_val) / 2
-    dry_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    wet_left = min_val + (max_val - min_val) * 0.7
-    return {
-        "Dry": trapmf(x, min_val, min_val, dry_right, normal_left),
-        "Normal": trimf(x, normal_left, normal_center, normal_right),
-        "Wet": trapmf(x, wet_left, normal_right, max_val, max_val)
-    }
+    return fuzzify_three_level(x, 'H_in', 'Dry', 'Normal', 'Wet')
 
 
 def fuzzify_Hout(x):
-    if 'H_out' not in DOMAINS:
-        return {"Dry": 0, "Normal": 0, "Wet": 0}
-    min_val, max_val = DOMAINS['H_out']
-    mid = (min_val + max_val) / 2
-    dry_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    wet_left = min_val + (max_val - min_val) * 0.7
-    return {
-        "Dry": trapmf(x, min_val, min_val, dry_right, normal_left),
-        "Normal": trimf(x, normal_left, normal_center, normal_right),
-        "Wet": trapmf(x, wet_left, normal_right, max_val, max_val)
-    }
+    return fuzzify_three_level(x, 'H_out', 'Dry', 'Normal', 'Wet')
 
 
 def fuzzify_L(x):
-    if 'L' not in DOMAINS:
-        return {"Low": 0, "Normal": 0, "High": 0}
-    min_val, max_val = DOMAINS['L']
-    mid = (min_val + max_val) / 2
-    low_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    high_left = min_val + (max_val - min_val) * 0.7
-    return {
-        "Low": trapmf(x, min_val, min_val, low_right, normal_left),
-        "Normal": trimf(x, normal_left, normal_center, normal_right),
-        "High": trapmf(x, high_left, normal_right, max_val, max_val)
-    }
+    return fuzzify_three_level(x, 'L', 'Low', 'Normal', 'High')
 
 
 def fuzzify_Solar(x):
-    if 'Solar' not in DOMAINS:
-        return {"Low": 0, "Normal": 0, "High": 0}
-    min_val, max_val = DOMAINS['Solar']
-    mid = (min_val + max_val) / 2
-    low_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    high_left = min_val + (max_val - min_val) * 0.7
-    return {
-        "Low": trapmf(x, min_val, min_val, low_right, normal_left),
-        "Normal": trimf(x, normal_left, normal_center, normal_right),
-        "High": trapmf(x, high_left, normal_right, max_val, max_val)
-    }
+    return fuzzify_three_level(x, 'Solar', 'Low', 'Normal', 'High')
 
 
 def fuzzify_CO2(x):
-    if 'CO2' not in DOMAINS:
-        return {"Low": 0, "Normal": 0, "High": 0}
-    min_val, max_val = DOMAINS['CO2']
-    mid = (min_val + max_val) / 2
-    low_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    high_left = min_val + (max_val - min_val) * 0.7
-    return {
-        "Low": trapmf(x, min_val, min_val, low_right, normal_left),
-        "Normal": trimf(x, normal_left, normal_center, normal_right),
-        "High": trapmf(x, high_left, normal_right, max_val, max_val)
-    }
+    return fuzzify_three_level(x, 'CO2', 'Low', 'Normal', 'High')
 
 
 def fuzzify_Wind(x):
-    if 'Wind' not in DOMAINS:
-        return {"Low": 0, "Medium": 0, "High": 0}
-    min_val, max_val = DOMAINS['Wind']
-    mid = (min_val + max_val) / 2
-    low_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    high_left = min_val + (max_val - min_val) * 0.7
-    return {
-        "Low": trapmf(x, min_val, min_val, low_right, normal_left),
-        "Medium": trimf(x, normal_left, normal_center, normal_right),
-        "High": trapmf(x, high_left, normal_right, max_val, max_val)
-    }
+    return fuzzify_three_level(x, 'Wind', 'Low', 'Medium', 'High')
 
 
 def fuzzify_N(x):
-    if 'N' not in DOMAINS:
-        return {"Low": 0, "Normal": 0, "High": 0}
-    min_val, max_val = DOMAINS['N']
-    mid = (min_val + max_val) / 2
-    low_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    high_left = min_val + (max_val - min_val) * 0.7
-    return {
-        "Low": trapmf(x, min_val, min_val, low_right, normal_left),
-        "Normal": trimf(x, normal_left, normal_center, normal_right),
-        "High": trapmf(x, high_left, normal_right, max_val, max_val)
-    }
+    return fuzzify_three_level(x, 'N', 'Low', 'Normal', 'High')
 
 
 def fuzzify_E(x):
-    if 'E' not in DOMAINS:
-        return {"Low": 0, "Normal": 0, "High": 0}
-    min_val, max_val = DOMAINS['E']
-    mid = (min_val + max_val) / 2
-    low_right = min_val + (max_val - min_val) * 0.3
-    normal_left = min_val + (max_val - min_val) * 0.25
-    normal_center = mid
-    normal_right = min_val + (max_val - min_val) * 0.75
-    high_left = min_val + (max_val - min_val) * 0.7
-    return {
-        "Low": trapmf(x, min_val, min_val, low_right, normal_left),
-        "Normal": trimf(x, normal_left, normal_center, normal_right),
-        "High": trapmf(x, high_left, normal_right, max_val, max_val)
-    }
+    return fuzzify_three_level(x, 'E', 'Low', 'Normal', 'High')
 
-#فازی‌سازی تمام ویژگی‌های یک رکورد
+
+# فازی‌سازی تمام ویژگی‌های یک رکورد
 def fuzzify_all_features(row):
-
     return {
         "Tin": fuzzify_Tin(row['T_in']),
         "Tout": fuzzify_Tout(row['T_out']),
@@ -232,18 +121,20 @@ def fuzzify_all_features(row):
         "E": fuzzify_E(row['E'])
     }
 
+
 # برچسب با بیشترین درجه عضویت
 def get_max_membership_label(fuzzy_dict):
     return max(fuzzy_dict, key=fuzzy_dict.get)
 
-#تبدیل رکورد به برچسب‌های فازی
+
+# تبدیل رکورد به برچسب‌های فازی
 def fuzzify_row_to_labels(row):
     fz = fuzzify_all_features(row)
     return {feat: get_max_membership_label(fz[feat]) for feat in fz}
 
 
 def save_fuzzy_labels(df, output_path):
-    print(f"\n💾 ذخیره برچسب‌های فازی در {output_path}...")
+    print(f"\n ذخیره برچسب‌های فازی در {output_path}...")
 
     records = []
     for idx, row in df.iterrows():
@@ -264,6 +155,48 @@ def save_fuzzy_labels(df, output_path):
     df_fuzzy.to_csv(output_path, index=False)
     print(f"{len(df_fuzzy)} رکورد در {output_path} ذخیره شد.")
     return df_fuzzy
+
+
+def save_full_fuzzy_values(df, output_path):
+    print(f"\n ذخیره مقادیر کامل فازی در {output_path}...")
+
+    records = []
+
+    for _, row in df.iterrows():
+        fz = fuzzify_all_features(row)
+        record = {}
+
+        for feat, memberships in fz.items():
+            # ذخیره همه درجات عضویت
+            for label, degree in memberships.items():
+                record[f"{feat}_{label}"] = degree
+
+            # ذخیره برچسب برنده
+            winner_label = get_max_membership_label(memberships)
+            winner_degree = memberships[winner_label]
+
+            record[f"{feat}_label"] = winner_label
+            record[f"{feat}_degree"] = winner_degree
+
+        # اضافه کردن W
+        if 'W_encoded' in row:
+            record['W'] = row['W_encoded']
+        elif 'W' in row:
+            record['W'] = row['W']
+
+        # اضافه کردن status
+        if 'status' in row:
+            record['status'] = row['status']
+
+        records.append(record)
+
+    df_fuzzy_full = pd.DataFrame(records)
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    df_fuzzy_full.to_csv(output_path, index=False)
+
+    print(f"{len(df_fuzzy_full)} رکورد در {output_path} ذخیره شد.")
+    return df_fuzzy_full
 
 
 # رسم توابع عضویت
@@ -328,9 +261,7 @@ def demo_fuzzification(sample_row):
     print("=" * 70)
 
 
-
 def main():
-
     # 1. بارگذاری داده آموزش
     print("\n  بارگذاری داده آموزش...")
     df_train = load_data("output/X_train.csv")
@@ -357,6 +288,11 @@ def main():
     if df_test is not None:
         print("\n  ذخیره برچسب‌های فازی تست...")
         save_fuzzy_labels(df_test, "output/X_test_fuzzy.csv")
+
+    save_full_fuzzy_values(df_train, "output/X_train_full_fuzzy.csv")
+    if df_test is not None:
+        save_full_fuzzy_values(df_test, "output/X_test_full.csv")
+
 
 if __name__ == "__main__":
     main()

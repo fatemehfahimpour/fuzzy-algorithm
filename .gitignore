@@ -2,3 +2,5 @@
 .idea/
 __pycache__/
 *.pyc
+step2/output
+step2/membership_plots

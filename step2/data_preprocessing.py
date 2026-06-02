@@ -52,13 +52,12 @@ def check_and_handle_missing(df):
     for col in df.columns:
         if df[col].isnull().sum() > 0:
             if df[col].dtype in ['int64', 'float64']:
-                df[col].fillna(df[col].mean(), inplace=True)  #جایگزینی با مفادیر عددی میانگین
+                df[col].fillna(df[col].mean(), inplace=True)  # جایگزینی با مفادیر عددی میانگین
                 print(f"  - {col}: پر شد با میانگین ({df[col].mean():.2f})")
             else:
-                df[col].fillna(df[col].mode()[0], inplace=True)  #جایگزینی با مد
+                df[col].fillna(df[col].mode()[0], inplace=True)  # جایگزینی با مد
                 print(f"  - {col}: پر شد با مد ({df[col].mode()[0]})")
     return df
-
 
 
 #  داده‌های پرت
@@ -75,7 +74,8 @@ def detect_outliers_iqr(df, column):
 
     return df, after - before, lower_bound, upper_bound
 
-#حذف همه ستون ها
+
+# حذف همه ستون ها
 def report_outliers_details(df, numerical_cols):
     for col in numerical_cols:
         if col in df.columns:
@@ -86,7 +86,6 @@ def report_outliers_details(df, numerical_cols):
                 print(f"  {col}: بدون داده پرت")
 
     return df
-
 
 
 #  W (Label Encoding)
@@ -140,13 +139,13 @@ def show_class_distribution_after(y_train, y_test):
     print("=" * 50)
 
 
-
 def save_split_data(X_train, X_test, y_train, y_test, output_dir="output"):
     os.makedirs(output_dir, exist_ok=True)
     X_train.to_csv(f"{output_dir}/X_train.csv", index=False)
     X_test.to_csv(f"{output_dir}/X_test.csv", index=False)
     y_train.to_csv(f"{output_dir}/y_train.csv", index=False)
     y_test.to_csv(f"{output_dir}/y_test.csv", index=False)
+
 
 if __name__ == "__main__":
     df_original = load_data()
@@ -169,4 +168,3 @@ if __name__ == "__main__":
     X_test['status'] = y_test.values
     show_class_distribution_after(y_train, y_test)
     save_split_data(X_train, X_test, y_train, y_test)
-
