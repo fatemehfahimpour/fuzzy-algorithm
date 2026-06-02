@@ -358,6 +358,5 @@ def main():
         print("\n  ذخیره برچسب‌های فازی تست...")
         save_fuzzy_labels(df_test, "output/X_test_fuzzy.csv")
 
-
 if __name__ == "__main__":
     main()
