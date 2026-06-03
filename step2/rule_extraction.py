@@ -199,6 +199,7 @@ def wang_mendel_rule_extraction(df_train, target_col='status', weight_method='mi
     # resolve conflicts
     final_rules = resolve_conflicts(aggregated_rules)
 
+    # os.makedirs('rules_results', exist_ok=True)
     # ذخیره فایل‌ها
     raw_rules.to_csv(f'rules_results/{save_prefix}_raw_rules.csv', index=False, encoding='utf-8-sig')
     aggregated_rules.to_csv(f'rules_results/{save_prefix}_aggregated_rules.csv', index=False, encoding='utf-8-sig')
