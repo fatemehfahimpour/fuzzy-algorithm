@@ -4,6 +4,7 @@ import random
 from deap import base, creator, tools, algorithms
 from sklearn.metrics import accuracy_score
 import os
+import matplotlib.pyplot as plt
 from step2.rule_extraction import match_rule_to_row
 
 RULES_FILE = "rules_results/rules_final_rules.csv"
@@ -183,6 +184,24 @@ def run_ga():
     print("\n10 قانون با بیشترین confidence:")
 
     print(top10[['antecedent', 'consequent', 'confidence']])
+
+    # -----------------رسم نمودار همگرایی GA----------------
+    generations = log.select('gen')
+    avg_fitness = log.select('avg')
+    max_fitness = log.select('max')
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(generations, avg_fitness, 'b-', label='میانگین برازندگی (Average)')
+    plt.plot(generations, max_fitness, 'r-', label='بهترین برازندگی (Max)')
+    plt.xlabel('نسل (Generation)')
+    plt.ylabel('برازندگی (Fitness)')
+    plt.title('همگرایی الگوریتم ژنتیک (GA Convergence)')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+
+    os.makedirs("plots", exist_ok=True)
+    plt.savefig("plots/ga_convergence.png", dpi=150, bbox_inches='tight')
+    plt.show()
 
     return best_rules
 
