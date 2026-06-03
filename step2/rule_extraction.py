@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 EPS = 1e-12
-FUZZY_FEATURES = ['T_in', 'T_out', 'H_in', 'H_out', 'L', 'Solar', 'CO2', 'Wind', 'N', 'E']
+FUZZY_FEATURES = ['Tin', 'Tout', 'Hin', 'Hout', 'L', 'Solar', 'CO2', 'Wind', 'N', 'E']
 CATEGORICAL_FEATURES = ['W']
 
 
@@ -169,21 +169,41 @@ def resolve_conflicts(rules_df):
     return resolved
 
 
-# باید درست بشه این بخش وارد نشده است در کدها
-def apply_dont_care(rule_antecedent, max_ratio=0.3):
-    """
-    این تابع فعلاً فقط اسکلت است.
-    در نسخه ساده می‌توان بعداً روی antecedentها اعمالش کرد.
-    """
+def apply_dont_care(rule_antecedent, row, max_ratio=0.3):
     terms = parse_antecedent(rule_antecedent)
     if not terms:
         return rule_antecedent
 
     n = len(terms)
-    max_dc = int(np.floor(max_ratio * n))
-    # اینجا اگر بخواهی می‌توانی بعضی ویژگی‌ها را با # جایگزین کنی
-    # فعلاً فعال نشده تا خروجی شفاف بماند
-    return rule_antecedent
+    max_remove = int(np.floor(max_ratio * n))
+
+    term_importance = []
+
+    for term in terms:
+        feature, label = term.split("=")
+
+        degree_col = f"{feature}_degree"
+
+        if degree_col in row:
+            importance = row[degree_col]  # درجه عضویت همان نمونه
+        else:
+            importance = 0.0
+
+        term_importance.append((term, importance))
+
+    # مرتب‌سازی از ضعیف‌ترین شرط
+    term_importance.sort(key=lambda x: x[1])
+
+    remove_terms = [t[0] for t in term_importance[:max_remove]]
+
+    new_terms = [t for t in terms if t not in remove_terms]
+
+    # جلوگیری از قانون خالی
+    if len(new_terms) == 0:
+        best_term = max(term_importance, key=lambda x: x[1])[0]
+        new_terms = [best_term]
+
+    return " AND ".join(new_terms)
 
 
 def wang_mendel_rule_extraction(df_train, target_col='status', weight_method='min', save_prefix='rules'):
@@ -195,6 +215,13 @@ def wang_mendel_rule_extraction(df_train, target_col='status', weight_method='mi
 
     # محاسبه confidence
     aggregated_rules = compute_confidence_for_rules(aggregated_rules, df_train, target_col=target_col)
+
+    # # don't care
+    # new_antecedents = []
+    # for row in aggregated_rules['antecedent']:
+    #     shortened_rule = apply_dont_care(row,df_train, max_ratio=0.3)
+    #     new_antecedents.append(shortened_rule)
+    # aggregated_rules['antecedent'] = new_antecedents
 
     # resolve conflicts
     final_rules = resolve_conflicts(aggregated_rules)

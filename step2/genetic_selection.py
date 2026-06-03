@@ -13,13 +13,13 @@ ALPHA = 0.01
 MIN_RULES = 10
 
 POP_SIZE = 50
-N_GEN = 40
+N_GENERATION = 40
 CXPB = 0.8
 MUTPB = 0.1
 TOURN_SIZE = 3
 EPS = 1e-12
 
-FUZZY_FEATURES = ['T_in', 'T_out', 'H_in', 'H_out', 'L', 'Solar', 'CO2', 'Wind', 'N', 'E']
+FUZZY_FEATURES = ['Tin', 'Tout', 'Hin', 'Hout', 'L', 'Solar', 'CO2', 'Wind', 'N', 'E']
 CATEGORICAL_FEATURES = ['W']
 
 rules_df = pd.read_csv(RULES_FILE)
@@ -139,7 +139,7 @@ def run_ga():
         toolbox,
         cxpb=CXPB,
         mutpb=MUTPB,
-        ngen=N_GEN,
+        ngen=N_GENERATION,
         stats=stats,
         halloffame=hof,
         verbose=True
