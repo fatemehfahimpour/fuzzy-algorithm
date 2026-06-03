@@ -1,6 +1,4 @@
 import os
-
-import numpy as np
 import pandas as pd
 
 EPS = 1e-12
@@ -169,41 +167,53 @@ def resolve_conflicts(rules_df):
     return resolved
 
 
-def apply_dont_care(rule_antecedent, row, max_ratio=0.3):
-    terms = parse_antecedent(rule_antecedent)
-    if not terms:
-        return rule_antecedent
+def apply_dont_care(antecedent_str, df_train, max_ratio=0.3):
+    terms = parse_antecedent(antecedent_str)
 
-    n = len(terms)
-    max_remove = int(np.floor(max_ratio * n))
+    if len(terms) <= 1:
+        return antecedent_str
 
-    term_importance = []
+    scored_terms = []
 
     for term in terms:
-        feature, label = term.split("=")
 
-        degree_col = f"{feature}_degree"
+        if "=" not in term:
+            continue
 
-        if degree_col in row:
-            importance = row[degree_col]  # درجه عضویت همان نمونه
-        else:
-            importance = 0.0
+        feat, label = term.split("=", 1)
+        feat = feat.strip()
+        label = label.strip()
 
-        term_importance.append((term, importance))
+        importance = 0.0
 
-    # مرتب‌سازی از ضعیف‌ترین شرط
-    term_importance.sort(key=lambda x: x[1])
+        # ویژگی فازی
+        if feat in FUZZY_FEATURES:
 
-    remove_terms = [t[0] for t in term_importance[:max_remove]]
+            deg_col = f"{feat}_{label}"
 
-    new_terms = [t for t in terms if t not in remove_terms]
+            if deg_col in df_train.columns:
+                importance = float(df_train[deg_col].mean())
 
-    # جلوگیری از قانون خالی
-    if len(new_terms) == 0:
-        best_term = max(term_importance, key=lambda x: x[1])[0]
-        new_terms = [best_term]
+        # ویژگی categorical
+        elif feat in CATEGORICAL_FEATURES:
+            importance = 1.0
 
-    return " AND ".join(new_terms)
+        scored_terms.append((term, importance))
+
+    if not scored_terms:
+        return antecedent_str
+
+    # مرتب سازی بر اساس اهمیت
+    scored_terms.sort(key=lambda x: x[1])
+
+    remove_k = int(len(scored_terms) * max_ratio)
+
+    # جلوگیری از حذف کامل antecedent
+    remove_k = min(remove_k, len(scored_terms) - 1)
+
+    kept_terms = [t[0] for t in scored_terms[remove_k:]]
+
+    return " AND ".join(kept_terms)
 
 
 def wang_mendel_rule_extraction(df_train, target_col='status', weight_method='min', save_prefix='rules'):
@@ -216,18 +226,26 @@ def wang_mendel_rule_extraction(df_train, target_col='status', weight_method='mi
     # محاسبه confidence
     aggregated_rules = compute_confidence_for_rules(aggregated_rules, df_train, target_col=target_col)
 
-    # # don't care
-    # new_antecedents = []
-    # for row in aggregated_rules['antecedent']:
-    #     shortened_rule = apply_dont_care(row,df_train, max_ratio=0.3)
-    #     new_antecedents.append(shortened_rule)
-    # aggregated_rules['antecedent'] = new_antecedents
-
-    # resolve conflicts
+    # حل conflict اولیه
     final_rules = resolve_conflicts(aggregated_rules)
 
-    # os.makedirs('rules_results', exist_ok=True)
-    # ذخیره فایل‌ها
+    # dont care
+    new_ants = []
+    for _, rule in final_rules.iterrows():
+        shortened = apply_dont_care(rule["antecedent"], df_train, max_ratio=0.3)
+        new_ants.append(shortened)
+
+    final_rules = final_rules.copy()
+    final_rules["antecedent"] = new_ants
+
+    # aggregation مجدد (ممکن است antecedent ها یکسان شوند)
+    final_rules = aggregate_rules(final_rules)
+    # confidence
+    final_rules = compute_confidence_for_rules(final_rules, df_train, target_col=target_col)
+    # حل conflict نهایی
+    final_rules = resolve_conflicts(final_rules)
+
+    # ذخیره خروجی
     raw_rules.to_csv(f'rules_results/{save_prefix}_raw_rules.csv', index=False, encoding='utf-8-sig')
     aggregated_rules.to_csv(f'rules_results/{save_prefix}_aggregated_rules.csv', index=False, encoding='utf-8-sig')
     final_rules.to_csv(f'rules_results/{save_prefix}_final_rules.csv', index=False, encoding='utf-8-sig')
