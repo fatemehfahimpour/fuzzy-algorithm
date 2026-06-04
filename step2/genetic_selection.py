@@ -128,7 +128,7 @@ toolbox.register("select", tools.selTournament, tournsize=TOURN_SIZE)  # تور�
 def run_ga():
     pop = toolbox.population(n=POP_SIZE)
 
-    hof = tools.HallOfFame(1)  # بهترین افراد کل الگوریتم را نگه دار
+    hof = tools.HallOfFame(1)  # بهترین فرد کل الگوریتم را نگه دار
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
 

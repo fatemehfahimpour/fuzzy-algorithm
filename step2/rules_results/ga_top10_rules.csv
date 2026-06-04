@@ -1,0 +1,11 @@
+antecedent,consequent,weight,count,source_row,confidence
+Hin=Normal AND Hout=Normal AND L=Low AND Solar=High AND CO2=Normal AND Wind=Low AND E=High AND W=3,Acceptable,0.3932925461229098,1,139,0.9999999999992968
+Tin=Cold AND Tout=Cold AND Hin=Normal AND L=High AND Solar=Low AND CO2=Normal AND N=Low AND W=1,Poor,0.4628387830172555,1,828,0.9999999999990214
+Tin=Normal AND Hout=Wet AND L=Normal AND Solar=Low AND CO2=High AND Wind=High AND N=Low AND W=2,Poor,0.586485683779774,1,1351,0.9999999999989732
+Tout=Cold AND Hin=Dry AND Hout=Dry AND L=Low AND CO2=Normal AND Wind=Low AND N=Low AND W=3,Acceptable,0.4467861918854097,1,165,0.9999999999989458
+Tin=Normal AND Tout=Normal AND Hout=Wet AND L=Normal AND Solar=Low AND Wind=High AND N=Low AND W=2,Poor,0.3725259319006683,1,1390,0.9999999999989294
+Tin=Normal AND Tout=Cold AND Hin=Normal AND Hout=Normal AND L=Low AND Solar=Normal AND E=High AND W=3,Acceptable,0.4003562184842556,1,337,0.9999999999989078
+Tin=Normal AND Tout=Cold AND L=Low AND Solar=Normal AND Wind=Medium AND N=High AND E=High AND W=3,Acceptable,0.3408106900473823,2,1327,0.9999999999988852
+Tin=Cold AND Hin=Normal AND L=Normal AND Solar=Low AND CO2=Normal AND Wind=High AND E=Normal AND W=2,Poor,0.5167404860432353,1,192,0.9999999999988324
+Tout=Hot AND Hin=Normal AND L=Normal AND CO2=Normal AND Wind=Low AND N=High AND E=High AND W=3,Acceptable,0.5831948101783274,1,1298,0.9999999999985736
+Tout=Normal AND Hout=Wet AND Solar=Low AND CO2=Normal AND Wind=High AND N=Low AND E=Normal AND W=2,Poor,0.3388375583624839,1,238,0.9999999999985408
