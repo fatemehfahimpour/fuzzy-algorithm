@@ -69,7 +69,8 @@ def aggregate_rules(raw_rules_df):
         .groupby(['antecedent', 'consequent'], as_index=False)
         .agg(
             weight=('weight', 'max'),  # انتخاب بیشترین وزن برای هر گروه
-            count=('weight', 'size')  # تعداد قوانین هر گروه
+            count=('weight', 'size'),  # تعداد قوانین هر گروه
+            source_row=('source_row', 'first')  # ذخیره ایندکس اصلی در df_train
         )
     )
     return grouped
@@ -167,53 +168,69 @@ def resolve_conflicts(rules_df):
     return resolved
 
 
-def apply_dont_care(antecedent_str, df_train, max_ratio=0.3):
-    terms = parse_antecedent(antecedent_str)
+def apply_dont_care_remove_k_features(rules_df, df_train, k=3):
+    FEATURE_ORDER = {'Tin': 0, 'Tout': 1, 'Hin': 2, 'Hout': 3, 'L': 4, 'Solar': 5, 'CO2': 6, 'Wind': 7, 'N': 8,
+                     'E': 9, 'W': 10}
+    new_ants = []
 
-    if len(terms) <= 1:
-        return antecedent_str
+    for _, rule in rules_df.iterrows():
+        antecedent = rule['antecedent']
+        src_idx = rule['source_row']  # ایندکس در df_train که بر اساس آن قانون استخراج شده
+        row = df_train.loc[src_idx]  # سطر df_train که بر اساس آن قانون استخراج شده
+        terms = parse_antecedent(antecedent)
 
-    scored_terms = []
+        scored_terms = []
+        for term in terms:
+            feat, label = term.split("=")
+            feat = feat.strip()
+            label = label.strip()
 
-    for term in terms:
+            if feat in FUZZY_FEATURES:
+                deg_col = f"{feat}_degree"  # پیدا کردن درجه هر فیچر
+                if deg_col in row.index:
+                    score = float(row[deg_col])
+                else:
+                    score = 0.0
 
-        if "=" not in term:
-            continue
+            elif feat in CATEGORICAL_FEATURES:
+                score = 1.0
 
-        feat, label = term.split("=", 1)
-        feat = feat.strip()
-        label = label.strip()
+            else:
+                score = 0.0
 
-        importance = 0.0
+            scored_terms.append((term, score)) # ذخیره هر ترم و درجه اش
 
-        # ویژگی فازی
-        if feat in FUZZY_FEATURES:
+        # مرتب سازی ترم ها بر اساس درجه عضویت
+        scored_terms.sort(key=lambda x: x[1])
 
-            deg_col = f"{feat}_{label}"
+        # حذف k ویژگی ضعیف
+        if len(scored_terms) > k:
+            remaining = scored_terms[k:]
+        else:
+            remaining = scored_terms
 
-            if deg_col in df_train.columns:
-                importance = float(df_train[deg_col].mean())
+        # جلوگیری از خالی شدن قانون
+        if len(remaining) == 0:
+            remaining = [scored_terms[-1]]
 
-        # ویژگی categorical
-        elif feat in CATEGORICAL_FEATURES:
-            importance = 1.0
+        # مرتب سازی نهایی بر اساس ترتیب ثابت ویژگی‌ها
+        remaining.sort(
+            key=lambda x: FEATURE_ORDER.get(
+                x[0].split("=")[0].strip(),
+                999
+            )
+        )
 
-        scored_terms.append((term, importance))
+        new_ant = " AND ".join(
+            term for term, _ in remaining
+        )
 
-    if not scored_terms:
-        return antecedent_str
+        new_ants.append(new_ant)
 
-    # مرتب سازی بر اساس اهمیت
-    scored_terms.sort(key=lambda x: x[1])
+    rules_df = rules_df.copy()
+    rules_df["antecedent"] = new_ants
 
-    remove_k = int(len(scored_terms) * max_ratio)
-
-    # جلوگیری از حذف کامل antecedent
-    remove_k = min(remove_k, len(scored_terms) - 1)
-
-    kept_terms = [t[0] for t in scored_terms[remove_k:]]
-
-    return " AND ".join(kept_terms)
+    return rules_df
 
 
 def wang_mendel_rule_extraction(df_train, target_col='status', weight_method='min', save_prefix='rules'):
@@ -229,21 +246,19 @@ def wang_mendel_rule_extraction(df_train, target_col='status', weight_method='mi
     # حل conflict اولیه
     final_rules = resolve_conflicts(aggregated_rules)
 
-    # dont care
-    new_ants = []
-    for _, rule in final_rules.iterrows():
-        shortened = apply_dont_care(rule["antecedent"], df_train, max_ratio=0.3)
-        new_ants.append(shortened)
+    # ---------------------------------------dont care---------------------------------------
+    # اعمال Dont Care
+    final_rules = apply_dont_care_remove_k_features(final_rules, df_train, k=3)
 
-    final_rules = final_rules.copy()
-    final_rules["antecedent"] = new_ants
-
-    # aggregation مجدد (ممکن است antecedent ها یکسان شوند)
+    # دوباره تجمیع
     final_rules = aggregate_rules(final_rules)
-    # confidence
-    final_rules = compute_confidence_for_rules(final_rules, df_train, target_col=target_col)
+
+    # محاسبه مجدد confidence
+    final_rules = compute_confidence_for_rules(final_rules, df_train)
+
     # حل conflict نهایی
     final_rules = resolve_conflicts(final_rules)
+    # ---------------------------------------------------------------------------------------
 
     # ذخیره خروجی
     raw_rules.to_csv(f'rules_results/{save_prefix}_raw_rules.csv', index=False, encoding='utf-8-sig')
@@ -253,7 +268,7 @@ def wang_mendel_rule_extraction(df_train, target_col='status', weight_method='mi
     # گزارش
     print("=== Wang-Mendel Rule Extraction Summary ===")
     print(f"Raw rules count: {len(raw_rules)}")
-    print(f"Aggregated rules count: {len(aggregated_rules)}")
+    print(f"Aggregated rules count without don't care: {len(aggregated_rules)}")
     print(f"Final rules count after conflict resolution: {len(final_rules)}")
 
     return raw_rules, aggregated_rules, final_rules
