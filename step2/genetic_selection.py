@@ -41,6 +41,7 @@ print("تعداد نمونه‌ها:", len(data_df_test))
 
 
 def predict_sample(row, selected_rules):
+    # بر اساس همه قوانین انتخاب شده مشخص میشه سطر متعلق به کدام کلاس است
     class_scores = {}
 
     for _, rule in selected_rules.iterrows():
@@ -84,11 +85,11 @@ def fitness_function(individual):
     if len(selected_idx) < MIN_RULES:
         return 0.0,
 
-    selected_rules = rules_df.iloc[selected_idx]
+    selected_rules = rules_df.iloc[selected_idx]  # انتخاب سطر ها بر اساس شماره ایندکس
 
     acc = compute_accuracy(selected_rules)
 
-    penalty = ALPHA * (len(selected_idx) / N_RULES)
+    penalty = ALPHA * (len(selected_idx) / N_RULES)  # جلوگیری از انتخاب تعداد زیاد قانون
 
     fitness = acc - penalty
 
@@ -96,19 +97,19 @@ def fitness_function(individual):
 
 
 # GA----------------------------------------------------------------------------------------------
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", list, fitness=creator.FitnessMax)
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))  # ساخت کلاس جدید به نام FitnessMax با هدف ماکس کردن
+creator.create("Individual", list, fitness=creator.FitnessMax)  # تعریف نوع فرد در جمعیت
 
 toolbox = base.Toolbox()
 
-toolbox.register("attr_bool", random.randint, 0, 1)  # تعریف ژن
+toolbox.register("attr_bool", random.randint, 0, 1)  # تعریف ژن (مقادیر 0 و 1 رندوم)
 
 toolbox.register(  # ساخت کروموزوم کامل
     "individual",
-    tools.initRepeat,
-    creator.Individual,
-    toolbox.attr_bool,
-    n=N_RULES
+    tools.initRepeat,  # اجرای تابع n بار و ذخیره در container
+    creator.Individual,  # container
+    toolbox.attr_bool,  # generator
+    n=N_RULES  # تعداد ژن های کروموزوم
 )
 
 toolbox.register(
@@ -118,7 +119,7 @@ toolbox.register(
     toolbox.individual
 )
 
-toolbox.register("evaluate", fitness_function)
+toolbox.register("evaluate", fitness_function)  # تعریف تابع برازندگی
 toolbox.register("mate", tools.cxTwoPoint)  # Two Point Crossover
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=TOURN_SIZE)  # تورنومنت سلکشن
@@ -130,27 +131,27 @@ def run_ga():
 
     hof = tools.HallOfFame(1)  # بهترین فرد کل الگوریتم را نگه دار
 
-    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)  # جمع‌آوری آمار هر نسل
 
-    stats.register("avg", np.mean)
-    stats.register("max", np.max)
+    stats.register("avg", np.mean)  # میانگین فیتنس نسل
+    stats.register("max", np.max)  # ماکسیمم فیتنس نسل
 
-    pop, log = algorithms.eaSimple(
+    pop, log = algorithms.eaSimple(  # evolutionary algorithm simple -> جمعیت نسل آخر و لاگ ها برای رسم نمودار
         pop,
         toolbox,
-        cxpb=CXPB,
-        mutpb=MUTPB,
+        cxpb=CXPB,  # crossover rate
+        mutpb=MUTPB,  # mutation rate
         ngen=N_GENERATION,
         stats=stats,
         halloffame=hof,
-        verbose=True
+        verbose=True  # چاپ اطلاعات هر نسل
     )
 
-    best = hof[0]
+    best = hof[0]  # بهترین فرد کل الگوریتم
 
-    selected_idx = [i for i, b in enumerate(best) if b == 1]
+    selected_idx = [i for i, b in enumerate(best) if b == 1]  # تبدیل کروموزوم به اندیس قوانین
 
-    best_rules = rules_df.iloc[selected_idx]
+    best_rules = rules_df.iloc[selected_idx]  # استخراج قوانین انتخاب‌شده
 
     print("\n========== نتیجه نهایی GA ==========")
     print("تعداد قوانین انتخاب شده:", len(best_rules))
