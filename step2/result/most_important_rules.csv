@@ -1,0 +1,11 @@
+antecedent,consequent,confidence,activation_frequency,importance_score
+Tin=Normal AND Hin=Normal AND Hout=Normal AND L=Normal AND Solar=Normal AND CO2=Normal AND E=Normal AND W=0,Acceptable,0.9052243069005156,144,0.9526121534505814
+Tin=Normal AND Tout=Normal AND Hin=Normal AND Hout=Normal AND Solar=Normal AND Wind=Medium AND E=Normal AND W=0,Acceptable,0.9026056224193504,126,0.8888028112099977
+Tin=Normal AND Tout=Normal AND L=Normal AND Solar=Normal AND CO2=Normal AND N=Normal AND E=Normal AND W=0,Acceptable,0.94037135741695,100,0.8174079009310333
+Tin=Normal AND Hin=Normal AND Hout=Normal AND Solar=Normal AND Wind=Medium AND N=Normal AND E=Normal AND W=0,Acceptable,0.9161110008262938,87,0.7601388337468076
+Tin=Normal AND Hin=Normal AND Hout=Normal AND L=Normal AND CO2=Normal AND Wind=Medium AND E=Normal AND W=3,Good,0.6730479670660872,115,0.7358295390888396
+Hin=Normal AND Hout=Normal AND L=Normal AND Solar=Normal AND Wind=Medium AND N=Normal AND E=Normal AND W=0,Acceptable,0.8509437656558997,89,0.7344996606060317
+Hin=Normal AND Hout=Normal AND L=Normal AND CO2=Normal AND Wind=Medium AND N=Normal AND E=Normal AND W=0,Acceptable,0.8715314955606014,86,0.7343768588917232
+Tout=Normal AND Hin=Normal AND Hout=Normal AND L=Normal AND Solar=Normal AND Wind=Medium AND N=Normal AND W=0,Acceptable,0.8532814770468045,86,0.7252518496348183
+Hout=Normal AND L=Normal AND Solar=Normal AND CO2=Normal AND Wind=Medium AND N=Normal AND E=Normal AND W=0,Acceptable,0.847100553334293,86,0.7221613877785604
+Tout=Normal AND Hin=Normal AND Hout=Normal AND L=Normal AND CO2=Normal AND Wind=Medium AND N=Normal AND W=0,Acceptable,0.8661481830253576,83,0.7212685359574327

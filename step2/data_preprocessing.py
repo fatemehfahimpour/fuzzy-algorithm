@@ -52,7 +52,8 @@ def check_and_handle_missing(df):
     for col in df.columns:
         if df[col].isnull().sum() > 0:
             if df[col].dtype in ['int64', 'float64']:
-                df[col].fillna(df[col].mean(), inplace=True)  # جایگزینی با مفادیر عددی میانگین
+                df[col] = df[col].fillna(df[col].mean(), inplace=False)
+                # df[col].fillna(df[col].mean(), inplace=True)  # جایگزینی با مفادیر عددی میانگین
                 print(f"  - {col}: پر شد با میانگین ({df[col].mean():.2f})")
             else:
                 df[col].fillna(df[col].mode()[0], inplace=True)  # جایگزینی با مد
@@ -158,6 +159,12 @@ if __name__ == "__main__":
     show_missing_per_column(df)
     df = check_and_handle_missing(df)
     df = df[df['N'] >= 0]
+    df = df[df['Solar'] >= 0]
+    df = df[df['CO2'] >= 0]
+    df = df[df['Wind'] >= 0]
+    df = df[df['H_in'] >= 0]
+    df = df[df['H_out'] >= 0]
+    df = df[df['E'] >= 0]
     df = report_outliers_details(df, numerical_cols)
     df, le = encode_weather(df)
     X = df.drop(columns=['status'])
