@@ -1,11 +1,11 @@
 antecedent,consequent,weight,count,source_row,confidence
+Hin=Normal AND Hout=Normal AND L=Low AND Solar=High AND CO2=Normal AND Wind=Low AND E=High AND W=3,Acceptable,0.3932925461229098,1,139,0.9999999999992968
 Tout=Cold AND Hout=Normal AND L=Low AND Solar=High AND CO2=Normal AND N=Normal AND E=High AND W=3,Acceptable,0.4975782691897827,1,570,0.9999999999992852
-Hin=Wet AND Hout=Wet AND L=Normal AND Solar=Low AND CO2=Normal AND Wind=Medium AND E=Normal AND W=2,Poor,0.6444059446963675,1,889,0.9999999999992588
-Tin=Normal AND Tout=Cold AND Hin=Normal AND Hout=Normal AND Solar=Normal AND N=High AND E=High AND W=3,Acceptable,0.4123758398352674,1,1586,0.999999999999134
-Tout=Cold AND Hin=Dry AND Hout=Dry AND L=Low AND CO2=Normal AND Wind=Low AND N=Low AND W=3,Acceptable,0.4467861918854097,1,165,0.9999999999989458
+Tin=Normal AND Hout=Wet AND L=Normal AND Solar=Low AND Wind=High AND N=Low AND E=Normal AND W=2,Poor,0.3724363685885146,1,642,0.9999999999990504
+Tin=Normal AND Hout=Wet AND L=Normal AND Solar=Low AND CO2=High AND Wind=High AND N=Low AND W=2,Poor,0.586485683779774,1,1351,0.9999999999989732
+Tin=Normal AND Tout=Cold AND Hin=Normal AND Hout=Normal AND L=Low AND Solar=Normal AND E=High AND W=3,Acceptable,0.4003562184842556,1,337,0.9999999999989078
+Tin=Hot AND Tout=Normal AND Hin=Normal AND Hout=Normal AND Solar=Low AND CO2=Normal AND N=High AND W=2,Poor,0.4427907286744215,1,19,0.9999999999988366
 Tin=Cold AND Hin=Normal AND L=Normal AND Solar=Low AND CO2=Normal AND Wind=High AND E=Normal AND W=2,Poor,0.5167404860432353,1,192,0.9999999999988324
-Tout=Cold AND Hin=Normal AND Hout=Normal AND Solar=Low AND Wind=Medium AND N=High AND E=High AND W=2,Poor,0.4003014903202755,1,133,0.9999999999987976
 Tout=Normal AND Hin=Normal AND Hout=Normal AND L=Low AND Solar=Normal AND Wind=Low AND N=High AND W=0,Acceptable,0.4659264142829615,1,535,0.9999999999986364
-Tin=Normal AND Tout=Normal AND Solar=Low AND CO2=Normal AND Wind=Medium AND N=Low AND E=Normal AND W=2,Poor,0.381575122076378,1,191,0.9999999999986324
+Tin=Normal AND Hin=Normal AND L=High AND Solar=Low AND CO2=High AND Wind=High AND N=Normal AND W=1,Poor,0.5919135770852872,1,393,0.9999999999985923
 Tout=Hot AND Hin=Dry AND Hout=Dry AND Solar=Normal AND CO2=Normal AND N=Low AND E=High AND W=3,Poor,0.3473248877922456,1,1600,0.9999999999985756
-Tout=Hot AND Hin=Normal AND L=Normal AND CO2=Normal AND Wind=Low AND N=High AND E=High AND W=3,Acceptable,0.5831948101783274,1,1298,0.9999999999985736

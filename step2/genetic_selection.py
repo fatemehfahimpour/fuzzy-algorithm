@@ -25,6 +25,7 @@ CATEGORICAL_FEATURES = ['W']
 
 rules_df = pd.read_csv(RULES_FILE)
 data_df_test = pd.read_csv(DATA_FILE_TEST)
+np.random.seed(42)
 SUBSET_SIZE = 50  # تعداد نمونه‌هایی که برای fitness استفاده می‌کنیم
 subset_idx = np.random.choice(
     len(data_df_test),
@@ -92,6 +93,8 @@ def fitness_function(individual):
     penalty = ALPHA * (len(selected_idx) / N_RULES)  # جلوگیری از انتخاب تعداد زیاد قانون
 
     fitness = acc - penalty
+    if fitness < 0:
+        fitness = 0.0
 
     return fitness,
 
@@ -126,7 +129,12 @@ toolbox.register("select", tools.selTournament, tournsize=TOURN_SIZE)  # تور�
 
 
 # اجرایGA-----------------------------------------------------
-def run_ga():
+def run_ga(selection_type='tournament'):
+    if selection_type == 'tournament':
+        toolbox.register("select", tools.selTournament, tournsize=TOURN_SIZE)
+    elif selection_type == 'roulette':
+        # استفاده از Stochastic Universal Sampling (مشابه رولت اما پایدارتر با مقادیر منفی)
+        toolbox.register("select", tools.selStochasticUniversalSampling)
     pop = toolbox.population(n=POP_SIZE)
 
     hof = tools.HallOfFame(1)  # بهترین فرد کل الگوریتم را نگه دار
@@ -212,4 +220,11 @@ if __name__ == "__main__":
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', None)
-    best_rules = run_ga()
+    # print("\n" + "=" * 60)
+    # print("اجرای GA با روش انتخاب رولت")
+    # print("=" * 60)
+    # res_roulette = run_ga('roulette')
+    print("\n" + "=" * 60)
+    print("اجرای GA با روش انتخاب تورنومنت")
+    print("=" * 60)
+    res_tournament = run_ga('tournament')
