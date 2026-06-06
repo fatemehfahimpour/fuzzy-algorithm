@@ -129,13 +129,22 @@ toolbox.register("select", tools.selTournament, tournsize=TOURN_SIZE)  # تور�
 
 
 # اجرایGA-----------------------------------------------------
-def run_ga(selection_type='tournament'):
+def run_ga(selection_type='tournament', crossover_type='two_point'):
     if selection_type == 'tournament':
         toolbox.register("select", tools.selTournament, tournsize=TOURN_SIZE)
     elif selection_type == 'roulette':
         # استفاده از Stochastic Universal Sampling (مشابه رولت اما پایدارتر با مقادیر منفی)
         toolbox.register("select", tools.selStochasticUniversalSampling)
+
+    if crossover_type == 'two_point':
+        toolbox.register("mate", tools.cxTwoPoint)
+    elif crossover_type == 'one_point':
+        toolbox.register("mate", tools.cxOnePoint)
+    elif crossover_type == 'uniform':
+        toolbox.register("mate", tools.cxUniform, indpb=0.5)
+
     pop = toolbox.population(n=POP_SIZE)
+
 
     hof = tools.HallOfFame(1)  # بهترین فرد کل الگوریتم را نگه دار
 
@@ -220,11 +229,27 @@ if __name__ == "__main__":
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', None)
+
     # print("\n" + "=" * 60)
     # print("اجرای GA با روش انتخاب رولت")
     # print("=" * 60)
     # res_roulette = run_ga('roulette')
+    # print("\n" + "=" * 60)
+    # print("اجرای GA با روش انتخاب تورنومنت")
+    # print("=" * 60)
+    # res_tournament = run_ga('tournament')
+
+    # print("\n" + "=" * 60)
+    # print("اجرای GA با روش تقاطع Two Point")
+    # print("=" * 60)
+    # res_two_point = run_ga('tournament', 'two_point')
+
+    # print("\n" + "=" * 60)
+    # print("اجرای GA با روش تقاطع One Point")
+    # print("=" * 60)
+    # res_one_point = run_ga('tournament', 'one_point')
+
     print("\n" + "=" * 60)
-    print("اجرای GA با روش انتخاب تورنومنت")
+    print("اجرای GA با روش تقاطع Uniform")
     print("=" * 60)
-    res_tournament = run_ga('tournament')
+    res_uniform = run_ga('tournament', 'uniform')
